@@ -1,3 +1,15 @@
+async def _insert_text_chunked(d, text: str, chunk_size: int = 3000) -> None:
+    timeout = max(45.0, min(120.0, len(text) / 500.0 + 30.0))
+    if len(text) <= chunk_size:
+        await d._cdp("Input.insertText", {"text": text}, timeout=timeout)
+        return
+    for i in range(0, len(text), chunk_size):
+        await d._cdp(
+            "Input.insertText",
+            {"text": text[i : i + chunk_size]},
+            timeout=timeout,
+        )
+
 """ChatGPT DOM interaction — composer/send-button/rate-limit DOM helpers.
 
 Phase 5 PR3 extraction (no behavior change). Owns the ChatGPT-composer
@@ -256,7 +268,7 @@ class ChatGPTDom:
             },
         )
         await asyncio.sleep(0.1)
-        await d._cdp("Input.insertText", {"text": text})
+        await _insert_text_chunked(d, text)
         await asyncio.sleep(0.5)
 
         # Verify the composer holds EXACTLY the intended input (canonicalized),
@@ -291,7 +303,7 @@ class ChatGPTDom:
                 "})()"
             )
             await asyncio.sleep(0.1)
-            await d._cdp("Input.insertText", {"text": text})
+            await _insert_text_chunked(d, text)
             await asyncio.sleep(0.5)
             if not await d._verify_composer_text(verify_selector, text):
                 if d._breakers:
