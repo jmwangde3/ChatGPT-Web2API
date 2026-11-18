@@ -1855,7 +1855,7 @@ class CDPDriver:
                 # never accepted.
                 last_status = "not_ready"
                 last_diagnostic = {}
-                for _ in range(60):
+                for _ in range(16):
                     result = await self._fetch_text_for_turn(conv_id, turn_anchor)
                     last_status = result.status
                     last_diagnostic = result.diagnostic or {}
@@ -1886,7 +1886,7 @@ class CDPDriver:
                     # If the last status was non_text (genuinely non-text
                     # response after full polling), fall through to the
                     # placeholder below. Otherwise raise a typed error.
-                    if last_status != "non_text":
+                    if last_status != "non_text" and not last_dom_text:
                         raise TurnReconciliationError(
                             conversation_id=conv_id,
                             anchor_mode=turn_anchor.mode,

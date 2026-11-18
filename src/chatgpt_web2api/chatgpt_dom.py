@@ -1,4 +1,5 @@
-async def _insert_text_chunked(d, text: str, chunk_size: int = 3000) -> None:
+from __future__ import annotations
+async def _insert_text_chunked(d, text: str, chunk_size: int = 1000000) -> None:
     timeout = max(45.0, min(120.0, len(text) / 500.0 + 30.0))
     if len(text) <= chunk_size:
         await d._cdp("Input.insertText", {"text": text}, timeout=timeout)
@@ -58,7 +59,6 @@ on the driver-facing seam (the PR2 lesson):
                     self._driver._breakers.record_success(...)
 """
 
-from __future__ import annotations
 
 import asyncio
 import json
